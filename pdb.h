@@ -51,9 +51,9 @@ typedef enum field_type_t{
 }field_type_t;
 
 typedef struct field_t{
-    field_type_t type;
     char *field_name;
     char *field_entry;
+    field_type_t type;
     unsigned short field_id;
     unsigned short parent_table;
     struct field_t *next;

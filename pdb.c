@@ -24,7 +24,7 @@ field_t *alloc_field(const char *field_entry, field_type_t type, table_t *t)
     pntr->next = NULL;
     pntr->field_id = t->field_count++;
     pntr->parent_table = t->table_id;
-    fprintf(stdout, "[Table %u]: Allocated field %u with name:entry '%s: %s'\n", 
+    fprintf(stdout, "[Table %u]: Allocated field %u with name:entry '%s: %s'\n",
             t->table_id, pntr->field_id, pntr->field_name, pntr->field_entry);
     return pntr;
 }
@@ -46,7 +46,7 @@ void free_table(table_t *t)
         for(curr = &t->fields; *curr != NULL;){
             field = *curr;
             *curr = field->next;
-            fprintf(stdout, "[Table %u]: Freeing field entry %u\n", t->table_id, 
+            fprintf(stdout, "[Table %u]: Freeing field entry %u\n", t->table_id,
                     field->field_id);
             free_field(field);
         }
@@ -69,12 +69,12 @@ table_t *alloc_table(unsigned short id)
 int parse_input_file(const char *file_path, table_t *t)
 {
     int input_fd;
-    struct stat st;
-    off_t file_size = 0;
-    char *data_pntr;
     char *buffer;
     char *token;
     char *string;
+    char *data_pntr;
+    struct stat st;
+    off_t file_size = 0;
 
     if((input_fd = open(file_path, O_RDONLY)) == -1){
         perror("open");
