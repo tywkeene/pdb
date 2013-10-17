@@ -23,7 +23,6 @@ const char *field_names[] = {
     "Credit Card Number",
     "Credit Card CCV2",
     "Credit Card Expiration Date",
-    NULL,
 };
 
 typedef enum field_type_t{
@@ -54,15 +53,15 @@ typedef struct field_t{
     char *field_name;
     char *field_entry;
     field_type_t type;
-    unsigned short field_id;
-    unsigned short parent_table;
+    unsigned int field_id;
+    unsigned int parent_table;
     struct field_t *next;
 }field_t;
 
 typedef struct table_t{
     field_t *fields;
-    unsigned short table_id;
-    unsigned short field_count;
+    unsigned int table_id;
+    unsigned int field_count;
     struct table_t *next;
 }table_t;
 

@@ -24,7 +24,7 @@ field_t *alloc_field(const char *field_entry, field_type_t type, table_t *t)
     pntr->next = NULL;
     pntr->field_id = t->field_count++;
     pntr->parent_table = t->table_id;
-    fprintf(stdout, "[Table %u]: Allocated field %u with name:entry '%s: %s'\n",
+    fprintf(stdout, "[Table %u]: Allocated field %u with name:entry -> '%s: %s'\n",
             t->table_id, pntr->field_id, pntr->field_name, pntr->field_entry);
     return pntr;
 }
@@ -54,7 +54,7 @@ void free_table(table_t *t)
     return;
 }
 
-table_t *alloc_table(unsigned short id)
+table_t *alloc_table(unsigned int id)
 {
     table_t *pntr;
     pntr = malloc(sizeof(table_t));
@@ -68,10 +68,10 @@ table_t *alloc_table(unsigned short id)
 
 int parse_input_file(const char *file_path, table_t *t)
 {
+    int i = 0;
     int input_fd;
-    char *buffer;
+    char *copy;
     char *token;
-    char *string;
     char *data_pntr;
     struct stat st;
     off_t file_size = 0;
@@ -81,6 +81,7 @@ int parse_input_file(const char *file_path, table_t *t)
         return -1;
     }
     if(fstat(input_fd, &st) < 0){
+        close(input_fd);
         perror("stat");
         return -1;
     }
@@ -88,27 +89,39 @@ int parse_input_file(const char *file_path, table_t *t)
     fprintf(stdout, "File size: %jd\n", file_size);
     if((data_pntr = mmap(NULL, file_size, PROT_READ, 
                     MAP_PRIVATE | MAP_POPULATE, input_fd, 0)) == MAP_FAILED){
+        close(input_fd);
         perror("mmap");
         return -1;
     }
     if(data_pntr == NULL){
+        close(input_fd);
         perror("mmap");
         return -1;
     }
 
-    buffer = malloc(file_size);
-    memcpy(buffer, data_pntr, file_size);
+    close(input_fd);
+    copy = malloc(file_size);
+    memcpy(copy, data_pntr, file_size);
     munmap(data_pntr, file_size);
+    token = strtok(copy, "|");
 
-    /*TODO:get string, get tokens, put tokens into fields*/
-
-    free(buffer);
+    while(token != NULL){
+        token = strtok(NULL, "|");
+        if(token == NULL || i == 20){
+            i = 0;
+            fprintf(stdout, "\n");
+            token = strtok(NULL, "|");
+        }
+        else
+            i++;
+    }
+    free(copy);
     return 0;
 }
 
 int main(int argc, char **argv)
 {
-    table_t *table;
+    table_t *table = NULL;
     if(parse_input_file(argv[1], table) == -1)
         return -1;
     return 0;
