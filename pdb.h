@@ -1,65 +1,23 @@
 #ifndef PDB_H
 #define PDB_H
 
-const char *field_names[] = {
-    "Gender",
-    "Name First",
-    "Initial Mid",
-    "Name Last",
-    "City",
-    "State",
-    "Country",
-    "Email",
-    "Username",
-    "Password",
-    "Telephone",
-    "Date of Birth",
-    "Occupation",
-    "Company",
-    "Blood Type",
-    "Weight",
-    "Height",
-    "Credit Card Type",
-    "Credit Card Number",
-    "Credit Card CCV2",
-    "Credit Card Expiration Date",
-};
-
-typedef enum field_type_t{
-    GENDER,
-    NAME_FIRST,
-    INITIAL_MID,
-    NAME_LAST,
-    CITY,
-    STATE,
-    COUNTRY,
-    EMAIL,
-    USERNAME,
-    PASSWORD,
-    TELEPHONE,
-    BIRTHDAY,
-    OCCUPATION,
-    COMPANY,
-    BLOOD_TYPE,
-    WEIGHT,
-    HEIGHT,
-    CC_TYPE,
-    CC_NUM,
-    CC_CVV2,
-    CC_EXP
-}field_type_t;
-
 typedef struct field_t{
     char *field_name;
     char *field_entry;
-    field_type_t type;
+    unsigned int type;
     unsigned int field_id;
     unsigned int parent_table;
     struct field_t *next;
 }field_t;
 
+typedef struct field_format_t{
+    char **field_format;
+    unsigned int max_fields;
+}field_format_t;
+
 typedef struct table_t{
     field_t *fields;
+    field_format_t *format;
     unsigned int table_id;
     unsigned int field_count;
     struct table_t *next;
