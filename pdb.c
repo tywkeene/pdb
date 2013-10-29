@@ -138,22 +138,6 @@ int read_file_format(char *format_string, table_t *t)
         }
         i = 0;
     }
-
-
-    /*
-       while(token != NULL){
-//        fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
-t->entries[i] = alloc_table_entry(token, i, t);
-fprintf(stdout, "token: %s\n", token);
-token = strtok(NULL, "|");
-if(token == NULL || i == t->format->max_entries - 1){
-i = 0;
-continue;
-}
-else
-i++;
-}
-*/
 }
 
 int parse_input_file(const char *file_path, table_t *t)
