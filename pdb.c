@@ -9,12 +9,12 @@
 
 #include "pdb.h"
 
-int free_field(field_t *pntr)
+int free_table_entry(table_entry_t *pntr)
 {
-    if(pntr->field_entry != NULL)
-        free(pntr->field_entry);
-    if(pntr->field_name != NULL)
-        free(pntr->field_name);
+    if(pntr->entry_data != NULL)
+        free(pntr->entry_data);
+    if(pntr->entry_name != NULL)
+        free(pntr->entry_name);
     free(pntr);
     return 1;
 }
@@ -22,59 +22,55 @@ int free_field(field_t *pntr)
 void free_table(table_t *t)
 {
     unsigned int i;
-    field_t **curr;
-    field_t *field;
     fprintf(stdout, "Freeing table %u\n", t->table_id);
-    if(t->field_count > 0)
-        for(curr = &t->fields; *curr != NULL;){
-            field = *curr;
-            *curr = field->next;
-            fprintf(stdout, "[Table %u]: Freeing field entry %u\n", t->table_id,
-                    field->field_id);
-            free_field(field);
+    if(t->entries != NULL){
+        for(i = 0; i < t->format->max_entries; i++){
+            fprintf(stdout, "Freeing table entry %u\n", i);
+            free(t->entries[i]->entry_name);
+            free(t->entries[i]->entry_data);
+            free(t->entries[i]);
         }
+        free(t->entries);
+    }
     if(t->format != NULL){
-        for(i = 0; i < t->format->max_fields; i++)
-            free(t->format->field_format[i]);
-        free(t->format->field_format); 
+        for(i = 0; i < t->format->max_entries; i++)
+            free(t->format->entry_format[i]);
+        free(t->format->entry_format); 
         free(t->format);
     }
     free(t);
     return;
 }
 
-field_t *alloc_field(const char *field_entry, unsigned int type, table_t *t)
+table_entry_t *alloc_table_entry(const char *entry, unsigned int type, table_t *t)
 {
-    field_t *pntr;
-    if(field_entry == NULL){
+    table_entry_t *pntr;
+    if(entry == NULL){
         fprintf(stderr, "Refusing to add NULL entry\n");
         return NULL;
     }
-    pntr = malloc(sizeof(field_t));
+    pntr = malloc(sizeof(table_entry_t));
 
-    pntr->field_entry = malloc(strlen(field_entry) + 1);
-    strncpy(pntr->field_entry, field_entry, strlen(field_entry) + 1);
+    pntr->entry_data = malloc(strlen(entry) + 1);
+    strncpy(pntr->entry_data, entry, strlen(entry) + 1);
 
-    pntr->field_name = malloc(strlen(t->format->field_format[type] + 1));
-    strncpy(pntr->field_name, t->format->field_format[type], 
-            strlen(t->format->field_format[type]) + 1);
+    pntr->entry_name = malloc(strlen(t->format->entry_format[type]) + 1);
+    strncpy(pntr->entry_name, t->format->entry_format[type], 
+            strlen(t->format->entry_format[type]) + 1);
 
     pntr->type = type;
-    pntr->next = NULL;
-    pntr->field_id = t->field_count++;
+    pntr->table_entry_id = t->entry_count++;
     pntr->parent_table = t->table_id;
 
-    fprintf(stdout, "[Table %u]: Allocated field %u with name:entry -> '%s: %s'\n",
-            t->table_id, pntr->field_id, pntr->field_name, pntr->field_entry);
     return pntr;
 }
 
-field_format_t *alloc_field_format(unsigned int max_fields)
+entry_format_t *alloc_entry_format(unsigned int max_entries)
 {
-    field_format_t *pntr;
-    pntr = malloc(sizeof(field_format_t));
-    pntr->max_fields = max_fields;
-    pntr->field_format = malloc(sizeof(char *) * max_fields);
+    entry_format_t *pntr;
+    pntr = malloc(sizeof(entry_format_t));
+    pntr->max_entries = max_entries;
+    pntr->entry_format = malloc(sizeof(char *) * max_entries);
     return pntr;
 }
 
@@ -83,33 +79,53 @@ table_t *alloc_table(unsigned int id)
     table_t *pntr;
     pntr = malloc(sizeof(table_t));
     pntr->table_id = id; 
-    pntr->field_count = 0;
-    pntr->fields = NULL;
-    pntr->next = NULL;
+    pntr->entry_count = 0;
+    pntr->entries = NULL;
+    pntr->format = NULL;
+    pntr->entries = NULL;
     fprintf(stdout, "Allocated table %u\n", id);
     return pntr;
+}
+
+unsigned int count_token(char *string, const char *token_string)
+{
+    unsigned int count = 0;
+    char *token;
+    char *copy;
+
+    copy = malloc(strlen(string) + 1);
+    strncpy(copy, string, strlen(string) + 1);
+    for(token = strtok(copy, token_string); token != NULL; 
+            token = strtok(NULL, token_string))
+        count++;
+    free(copy);
+    return count;
 }
 
 int read_file_format(char *format_string, table_t *t)
 {
     char *token;
     char *copy;
+    char *format_string_copy;
     unsigned int i;
-    unsigned int num_fields;
+    unsigned int num_entries;
 
     copy = malloc(strlen(format_string) + 1);
     strncpy(copy, format_string, strlen(format_string) + 1);
+    format_string_copy = strtok(copy, "\r\n");
 
-    token = strtok(copy, "|");
-    num_fields = atoi(token);
-    t->format = alloc_field_format(num_fields);
+    num_entries = count_token(format_string_copy, "|");
+    t->format = alloc_entry_format(num_entries);
 
-    fprintf(stdout, "Number of fields: %u\n", t->format->max_fields);
-    for(i = 0; i < num_fields; i++){
+    fprintf(stdout, "Number of entries: %u\n", t->format->max_entries);
+    token = strtok(format_string_copy, "|");
+    for(i = 0; i < num_entries; i++){
+        t->format->entry_format[i] = malloc(sizeof(char) * strlen(token) + 1);
+        strncpy(t->format->entry_format[i], token, strlen(token) + 1);
+        fprintf(stdout, "[%u] %s\n", i, t->format->entry_format[i]);
         token = strtok(NULL, "|");
-        t->format->field_format[i] = malloc(sizeof(char) * strlen(token) + 1);
-        strncpy(t->format->field_format[i], token, strlen(token) + 1);
-        fprintf(stdout, "[%u] %s\n", i, t->format->field_format[i]);
+        if(token == NULL)
+            break;
     }
     fprintf(stdout, "Got field format\n");
     free(copy);
@@ -157,20 +173,16 @@ int parse_input_file(const char *file_path, table_t *t)
     munmap(data_pntr, file_size);
 
     read_file_format(copy, t);
+    t->entries = malloc(sizeof(table_entry_t *) * t->format->max_entries);
     token = strtok(copy, "|");
 
-    while(token != NULL){
-        token = strtok(NULL, "|");
-        fprintf(stdout, "[%u] %s: %s\n", i, t->format->field_format[i], token);
-        if(i == t->format->max_fields - 1){
-            fprintf(stdout, "\n");
-            token = strtok(NULL, "|");
-            i = 0;
-            continue;
-        }
-        if(token == NULL)
+    while(token != NULL && i < t->format->max_entries){
+        //fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
+        t->entries[i] = alloc_table_entry(token, i, t);
+        if((token = strtok(NULL, "|")) == NULL)
             break;
-        i++;
+        else
+            i++;
     }
     free(copy);
     return 0;

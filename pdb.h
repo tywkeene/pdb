@@ -1,26 +1,24 @@
 #ifndef PDB_H
 #define PDB_H
 
-typedef struct field_t{
-    char *field_name;
-    char *field_entry;
+typedef struct table_entry_t{
+    char *entry_name;
+    char *entry_data;
     unsigned int type;
-    unsigned int field_id;
+    unsigned int table_entry_id;
     unsigned int parent_table;
-    struct field_t *next;
-}field_t;
+}table_entry_t;
 
-typedef struct field_format_t{
-    char **field_format;
-    unsigned int max_fields;
-}field_format_t;
+typedef struct entry_format_t{
+    char **entry_format;
+    unsigned int max_entries;
+}entry_format_t;
 
 typedef struct table_t{
-    field_t *fields;
-    field_format_t *format;
+    table_entry_t **entries;
+    entry_format_t *format;
     unsigned int table_id;
-    unsigned int field_count;
-    struct table_t *next;
+    unsigned int entry_count;
 }table_t;
 
 #endif
