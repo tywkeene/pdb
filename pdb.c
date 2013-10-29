@@ -25,7 +25,7 @@ void free_table(table_t *t)
     fprintf(stdout, "Freeing table %u\n", t->table_id);
     if(t->entries != NULL){
         for(i = 0; i < t->format->max_entries; i++){
-            fprintf(stdout, "Freeing table entry %u\n", i);
+            fprintf(stdout, "\t entry %u\n", i);
             free(t->entries[i]->entry_name);
             free(t->entries[i]->entry_data);
             free(t->entries[i]);
@@ -130,6 +130,30 @@ int read_file_format(char *format_string, table_t *t)
     fprintf(stdout, "Got field format\n");
     free(copy);
     return 0;
+    
+    while(token != NULL){
+        for(i = 0; i < t->format->max_entries; i++){
+            fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
+            token = strtok(NULL, "|");
+        }
+        i = 0;
+    }
+
+
+    /*
+       while(token != NULL){
+//        fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
+t->entries[i] = alloc_table_entry(token, i, t);
+fprintf(stdout, "token: %s\n", token);
+token = strtok(NULL, "|");
+if(token == NULL || i == t->format->max_entries - 1){
+i = 0;
+continue;
+}
+else
+i++;
+}
+*/
 }
 
 int parse_input_file(const char *file_path, table_t *t)
@@ -176,11 +200,14 @@ int parse_input_file(const char *file_path, table_t *t)
     t->entries = malloc(sizeof(table_entry_t *) * t->format->max_entries);
     token = strtok(copy, "|");
 
-    while(token != NULL && i < t->format->max_entries){
-        //fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
-        t->entries[i] = alloc_table_entry(token, i, t);
-        if((token = strtok(NULL, "|")) == NULL)
-            break;
+    while(token != NULL){
+        fprintf(stdout, "[%u] %s: %s\n", i, t->format->entry_format[i], token);
+        token = strtok(NULL, "|");
+        if(i == t->format->max_entries - 1){
+            fprintf(stdout, "\n");
+            token = strtok(NULL, "|");
+            i = 0;
+        }
         else
             i++;
     }
