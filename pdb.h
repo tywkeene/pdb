@@ -2,23 +2,30 @@
 #define PDB_H
 
 typedef struct table_entry_t{
-    char *entry_name;
     char *entry_data;
-    unsigned int type;
-    unsigned int table_entry_id;
-    unsigned int parent_table;
+    char *entry_name;
+    unsigned int entry_id;
+    unsigned int parent_table_id;
 }table_entry_t;
 
-typedef struct entry_format_t{
-    char **entry_format;
-    unsigned int max_entries;
-}entry_format_t;
-
 typedef struct table_t{
-    table_entry_t **entries;
-    entry_format_t *format;
+    table_entry_t **table_entries;
     unsigned int table_id;
-    unsigned int entry_count;
+    unsigned int parent_set_id;
+    unsigned int table_entry_count;
 }table_t;
+
+typedef struct table_entry_format_t{
+    char **format;
+    unsigned int max_entries;
+}table_entry_format_t;
+
+typedef struct table_set_t{
+    table_t **table_set;
+    table_entry_format_t *entry_format;
+    unsigned int set_id;
+    unsigned int max_tables;
+    unsigned int set_table_count;
+}table_set_t;
 
 #endif
