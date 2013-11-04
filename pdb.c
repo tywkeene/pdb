@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h> 
+#include <time.h>
 #include <sys/stat.h>
 #include <sys/mman.h> 
 #include <sys/types.h>
@@ -11,11 +12,9 @@
 
 void free_table_entry(table_entry_t *e)
 {
-    fprintf(stdout, "Freeing entry [%u]\n", e->entry_id);
     if(e == NULL)
         return;
     free(e->entry_data);
-    free(e->entry_name);
     free(e);
     return;
 }
@@ -23,7 +22,6 @@ void free_table_entry(table_entry_t *e)
 void free_table(table_t *t)
 {
     unsigned int i;
-    fprintf(stdout, "Freeing table [%u] with %u entries\n", t->table_id, t->table_entry_count);
     for(i = 0; i < t->table_entry_count; i++)
         free_table_entry(t->table_entries[i]);
     free(t->table_entries);
@@ -46,8 +44,8 @@ void free_table_format(table_entry_format_t *f)
 void free_table_set(table_set_t *ts)
 {
     unsigned int i;
-    fprintf(stdout, "Freeing table set [%u] with [%u/%u] tables\n",
-            ts->set_id, ts->set_table_count, ts->max_tables);
+    fprintf(stdout, "Freeing table set [%u] with %u/%u tables [%u entries per table]\n",
+            ts->set_id, ts->set_table_count, ts->max_tables, ts->entry_format->max_entries);
     for(i = 0; i < ts->max_tables; i++)
         free_table(ts->table_set[i]);
     free(ts->table_set);
@@ -61,18 +59,17 @@ table_entry_t *alloc_table_entry(unsigned int id, const char *entry, unsigned in
 {
     table_entry_t *e;
     e = malloc(sizeof(table_entry_t));
-
-    fprintf(stdout, "Allocating table entry [%u] [table %u]: [%s:%s]\n", id, t->table_id, 
-            f->format[type], entry);
-
     e->entry_data = malloc(strlen(entry) + 1);
     strncpy(e->entry_data, entry, strlen(entry) + 1);
 
-    e->entry_name = malloc(strlen(f->format[type]) + 1);
-    strncpy(e->entry_name, f->format[type], strlen(f->format[type]) + 1);
+    e->entry_name = f->format[type];
 
     e->entry_id = id;
     e->parent_table_id = t->table_id;
+    e->entry_timestamp = time(NULL);
+
+    fprintf(stdout, "Entry Name: %s\nEntry Data: %s\nEntry ID: %u\nParent table ID: %u\nTimestamp: %u\n\n",
+            e->entry_name, e->entry_data, e->entry_id, e->parent_table_id, e->entry_timestamp);
 
     return e;
 }
@@ -80,12 +77,12 @@ table_entry_t *alloc_table_entry(unsigned int id, const char *entry, unsigned in
 table_t *alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries)
 {
     table_t *t;
-    fprintf(stdout, "Allocating table [%u] [set %u] with max entries %u\n", id, parent_id, max_entries);
     t = malloc(sizeof(table_t));
     t->table_entries = calloc(max_entries, sizeof(table_entry_t *));
     t->table_id = id;
     t->parent_set_id = parent_id;
     t->table_entry_count = 0;
+    t->table_timestamp = time(NULL);
     return t;
 }
 
@@ -101,13 +98,13 @@ table_entry_format_t *alloc_entry_format(unsigned int max_entries)
 table_set_t *alloc_table_set(unsigned int id, unsigned int max_tables)
 {
     table_set_t *ts;
-    fprintf(stdout, "Allocating table set [%u] with max tables %u\n", id, max_tables);
     ts = malloc(sizeof(table_set_t));
     ts->table_set = calloc(max_tables, sizeof(table_t *));
     ts->entry_format = NULL;
     ts->set_id = id;
     ts->set_table_count = 0;
     ts->max_tables = max_tables;
+    ts->set_timestamp = time(NULL);
     return ts;
 }
 
@@ -148,13 +145,13 @@ table_set_t *read_file_format(char *format_string, unsigned int set_count)
     ts = alloc_table_set(set_count, num_tables);
     ts->entry_format = alloc_entry_format(num_entries);
 
-    fprintf(stdout, "Number of tables per set: %u\n", ts->max_tables);
+    fprintf(stdout, "Number of tables in a set: %u\n", ts->max_tables);
     fprintf(stdout, "Number of entries per table: %u\n", ts->entry_format->max_entries);
     token = strtok(format_string_copy, "|");
     for(i = 0; i < num_entries; i++){
+        fprintf(stdout, "token strlen: %d\n", strlen(token));
         ts->entry_format->format[i] = malloc(strlen(token) + 1);
         strncpy(ts->entry_format->format[i], token, strlen(token) + 1);
-        fprintf(stdout, "[%u]: %s\n", i, ts->entry_format->format[i]);
         if((token = strtok(NULL, "|")) == NULL)
             break;
     }
@@ -215,13 +212,13 @@ table_set_t *parse_input_file(const char *file_path, unsigned int set_count)
                 token, entry, ts->table_set[line], ts->entry_format);
         token = strtok(NULL, "|");
         if(entry == ts->entry_format->max_entries - 1){
-            fprintf(stdout, "\n");
             if((token = strtok(NULL, "|")) == NULL)
                 break;
             line++;
             entry = 0;
             ts->table_set[line] = alloc_table(ts->set_table_count++, ts->set_id, 
                     ts->entry_format->max_entries);
+            fprintf(stdout, "Table %u\n-----\n", ts->table_set[line]->table_id);
         }
         else
             entry++;

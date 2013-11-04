@@ -2,7 +2,7 @@ SRC = pdb.c
 OBJ = ${SRC:.c=.o}
 MOBJ = @$.m.c
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -lcrypto
 
 all: pdb
 
