@@ -149,7 +149,6 @@ table_set_t *read_file_format(char *format_string, unsigned int set_count)
     fprintf(stdout, "Number of entries per table: %u\n", ts->entry_format->max_entries);
     token = strtok(format_string_copy, "|");
     for(i = 0; i < num_entries; i++){
-        fprintf(stdout, "token strlen: %d\n", strlen(token));
         ts->entry_format->format[i] = malloc(strlen(token) + 1);
         strncpy(ts->entry_format->format[i], token, strlen(token) + 1);
         if((token = strtok(NULL, "|")) == NULL)
