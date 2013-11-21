@@ -68,8 +68,6 @@ table_entry_t *alloc_table_entry(unsigned int id, const char *entry, unsigned in
     e->parent_table_id = t->table_id;
     e->entry_timestamp = time(NULL);
 
-    fprintf(stdout, "Entry Name: %s\nEntry Data: %s\nEntry ID: %u\nParent table ID: %u\nTimestamp: %u\n\n",
-            e->entry_name, e->entry_data, e->entry_id, e->parent_table_id, e->entry_timestamp);
 
     return e;
 }
@@ -217,7 +215,7 @@ table_set_t *parse_input_file(const char *file_path, unsigned int set_count)
             entry = 0;
             ts->table_set[line] = alloc_table(ts->set_table_count++, ts->set_id, 
                     ts->entry_format->max_entries);
-            fprintf(stdout, "Table %u\n-----\n", ts->table_set[line]->table_id);
+          //  fprintf(stdout, "Table %u\n-----\n", ts->table_set[line]->table_id);
         }
         else
             entry++;
@@ -236,21 +234,54 @@ int compress_database(const char *filename_in, const char *filename_out)
     return zerr(def(filename_in, filename_out, 9));
 }
 
+void print_table_entry(table_entry_t *e)
+{
+    fprintf(stdout, "Entry Name: %s\nEntry Data: %s\nEntry ID: %u\nParent table ID: %u\nTimestamp: %u\n\n",
+            e->entry_name, e->entry_data, e->entry_id, e->parent_table_id, (unsigned int)e->entry_timestamp);
+}
+
+int slow_search(table_set_t *ts, const char *term)
+{
+    time_t pre;
+    time_t post;
+    double result;
+    unsigned int curr_table;
+    unsigned int curr_entry;
+    table_t *t;
+
+    pre = time(&pre);
+    for(curr_table = 0; curr_table < ts->set_table_count; curr_table++){
+        t = ts->table_set[curr_table];
+        for(curr_entry = 0; curr_entry < t->table_entry_count; curr_entry++)
+            if(strncmp(term, t->table_entries[curr_entry]->entry_data, strlen(term)) == 0){
+                fprintf(stdout, "Found match\n");
+                print_table_entry(t->table_entries[curr_entry]);
+            }
+    }
+    post = time(&post);
+    result = difftime(post, pre);
+    fprintf(stdout, "Search took %.2f seconds\n", result);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
+    const char *default_swap_name = "database.swap.pdb";
     table_set_t *ts = NULL;
 
     if(argv[1] == NULL){
         fprintf(stdout, "usage: %s <filename>\n", argv[0]);
         return -1;
     }
-    if(decompress_database(argv[1], "database.swap.pdb") != 0)
+    if(decompress_database(argv[1], default_swap_name) != 0)
         return -1;
 
-    ts = parse_input_file("database.swap.pdb", 0);
+    ts = parse_input_file(default_swap_name, 0);
+    slow_search(ts, "James");
 
-    if(compress_database("database.swap.pdb", argv[1]))
+    if(compress_database(default_swap_name, argv[1]) != 0)
         return -1;
-    unlink("database.swap.pdb");
+    unlink(default_swap_name);
+    free_table_set(ts);
     return 0;
 }
