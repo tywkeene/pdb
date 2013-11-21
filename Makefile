@@ -1,4 +1,4 @@
-SRC = pdb.c
+SRC = pdb.c compression.c
 OBJ = ${SRC:.c=.o}
 MOBJ = @$.m.c
 CC = gcc

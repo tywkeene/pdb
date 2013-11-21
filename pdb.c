@@ -226,16 +226,31 @@ table_set_t *parse_input_file(const char *file_path, unsigned int set_count)
     return ts;
 }
 
+int decompress_database(const char *filename_in, const char *filename_out)
+{
+    return zerr(inf(filename_in, filename_out));
+}
+
+int compress_database(const char *filename_in, const char *filename_out)
+{
+    return zerr(def(filename_in, filename_out, 9));
+}
+
 int main(int argc, char **argv)
 {
     table_set_t *ts = NULL;
-    unsigned int set_count = 0;
+
     if(argv[1] == NULL){
         fprintf(stdout, "usage: %s <filename>\n", argv[0]);
         return -1;
     }
-    if((ts = parse_input_file(argv[1], set_count)) == NULL)
+    if(decompress_database(argv[1], "database.swap.pdb") != 0)
         return -1;
-    free_table_set(ts);
+
+    ts = parse_input_file("database.swap.pdb", 0);
+
+    if(compress_database("database.swap.pdb", argv[1]))
+        return -1;
+    unlink("database.swap.pdb");
     return 0;
 }
