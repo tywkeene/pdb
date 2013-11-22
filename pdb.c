@@ -240,6 +240,47 @@ void print_table_entry(table_entry_t *e)
             e->entry_name, e->entry_data, e->entry_id, e->parent_table_id, (unsigned int)e->entry_timestamp);
 }
 
+int cmp(const void *one, const void *two)
+{
+    /*Don't ask because I have no idea, see qsort man page*/
+    return strcmp(*(char * const *)one, *(char * const *)two);
+}
+
+int alpha_sort(table_set_t  *ts)
+{
+    time_t pre;
+    time_t post;
+    double result;
+    unsigned int i = 0;
+    unsigned int curr_entry;
+    unsigned int curr_table;
+    char **array;
+    table_t *t;
+    table_entry_t *e;
+    unsigned int elements = (ts->set_table_count * ts->entry_format->max_entries);
+
+    array = calloc(elements, sizeof(char *));
+    pre = time(&pre);
+    for(curr_table = 0; curr_table < ts->set_table_count; curr_table++){
+        t = ts->table_set[curr_table];
+        for(curr_entry = 0;  curr_entry < t->table_entry_count; curr_entry++, i++){
+            e = t->table_entries[curr_entry];
+            array[i] = malloc(strlen(e->entry_data) + 1);
+            strncpy(array[i], e->entry_data, strlen(e->entry_data) + 1);
+        }
+    }
+
+    qsort(&array[0], elements, sizeof(char *), cmp);
+
+    post = time(&post);
+    result = difftime(post, pre);
+    fprintf(stdout, "Sorted %u elements in %.2f seconds\n", elements, result);
+    for(i = 0; i < elements; i++)
+        free(array[i]);
+    free(array);
+    return 0;
+}
+
 int slow_search(table_set_t *ts, const char *term)
 {
     time_t pre;
@@ -277,7 +318,6 @@ int main(int argc, char **argv)
         return -1;
 
     ts = parse_input_file(default_swap_name, 0);
-    slow_search(ts, "James");
 
     if(compress_database(default_swap_name, argv[1]) != 0)
         return -1;
