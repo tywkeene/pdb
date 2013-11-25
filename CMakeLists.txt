@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 2.6)
+project(libpdb)
+
+set(CMAKE_C_COMPILER gcc)
+add_library(pdb SHARED pdb.c)
+
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 0)
+set(VERSION_RELEASE 0)
+set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}) 
+set_target_properties(pdb PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR}) 
+
