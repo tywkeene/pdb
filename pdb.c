@@ -242,5 +242,6 @@ table_set_t *pdb_read_table_set(const char *filename, unsigned int id)
 
     for(cur_table = 0; cur_table < file_header.tables; cur_table++)
         ts->table_set[cur_table] = pdb_read_table_header(fd, cur_table, ts->set_id);
+    fclose(fd);
     return ts;
 }
