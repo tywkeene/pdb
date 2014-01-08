@@ -12,30 +12,42 @@
 #define PDB_TABLE_HEADER_LEN (sizeof(struct table_header_t))
 #define PDB_ENTRY_HEADER_LEN (sizeof(struct table_entry_header_t))
 
+/*Error maigc numbers, used in pdb_get_error() to get a descriptive string
+ * of the most recent error*/
 #define ERROR_BAD_VERSION 1
 #define ERROR_INVALID_FILE 2
 #define ERROR_IO 3
 
+/*Global variables of various uses*/
+
 /*Holds the error number of the most recent error (defined above*/
 int pdb_errno;
 
+/*File header - Holds length of table entry 
+ * name/data and the timestamp of the entry*/
 typedef struct table_entry_header_t{
     unsigned int name_len;
     unsigned int data_len;
     time_t timestamp;
 }__attribute__((packed)) table_entry_header_t;
 
+/*File header - Holds the count of entries 
+ * in the table and the timstamp for that table*/
 typedef struct table_header_t{
     unsigned int entries;
     time_t timestamp;
 }__attribute__((packed)) table_header_t;
 
+/*File header - Holds the PDB version of the file, 
+ * number of tables and timestamp of the set*/
 typedef struct file_header_t{
     int pdb_version_major;
     unsigned int tables;
     time_t timestamp;
 }__attribute__((packed)) file_header_t;
 
+/*Table entry (or 'collumn' in sql-speak). Holds the actual 
+ * data name/data, an id, the id of the parent table and the entry timestamp*/
 typedef struct table_entry_t{
     char *entry_data;
     char *entry_name;
@@ -44,6 +56,8 @@ typedef struct table_entry_t{
     time_t entry_timestamp;
 }table_entry_t;
 
+/*Table (or row in sql-speak). Holds a variable number of table entries 
+ * in table_entries, a table id, a parent set id, number of tables and the timestamp*/
 typedef struct table_t{
     table_entry_t **table_entries;
     unsigned int table_id;
@@ -52,6 +66,8 @@ typedef struct table_t{
     time_t table_timestamp;
 }table_t;
 
+/*Table set (or file in sql-speak, I guess?) Holds a variable amount of tables,
+ * the set id, max tables, current tables in this set and the timestamp*/
 typedef struct table_set_t{
     table_t **table_set;
     unsigned int set_id;
