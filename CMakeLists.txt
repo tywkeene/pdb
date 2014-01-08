@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
 project(libpdb)
 
-set(CMAKE_C_COMPILER gcc)
+set(CMAKE_C_COMPILER clang)
+set(CMAKE_C_FLAGS "-g -Wall -std=c11")
 add_library(pdb SHARED pdb.c)
 
 set(VERSION_MAJOR 0)
@@ -10,3 +11,15 @@ set(VERSION_RELEASE 0)
 set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}) 
 set_target_properties(pdb PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR}) 
 
+
+include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
+check_function_exists(fread HAVE_FREAD)
+check_function_exists(fwrite HAVE_FWRITE)
+check_function_exists(fflush HAVE_FFLUSH)
+check_function_exists(fopen HAVE_FOPEN)
+check_function_exists(fclose HAVE_FCLOSE)
+check_function_exists(malloc HAVE_MALLOC)
+check_function_exists(calloc HAVE_CALLOC)
+check_function_exists(free HAVE_FREE)
+check_function_exists(strncpy HAVE_STRNCPY)
+check_function_exists(strlen HAVE_STRLEN)
