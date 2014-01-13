@@ -4,8 +4,8 @@
 
 int main(void)
 {
-    table_set_t *ts = pdb_alloc_table_set(0, 1);
-    ts->table_set[0] = pdb_alloc_table(0, 0, 1);
+    table_set_t *ts = pdb_alloc_table_set(0, 1, "Table set");
+    ts->table_set[0] = pdb_alloc_table(0, 0, 1, "Table");
     ts->set_table_count++;
     ts->table_set[0]->table_entries[0] = pdb_alloc_table_entry(0, 0, "Name", "Entry");
     ts->table_set[0]->table_entry_count++;
@@ -15,7 +15,7 @@ int main(void)
     fprintf(stdout, "Writing name '%s' and data '%s'\n",
             e->entry_name, e->entry_data);
 
-    if(pdb_write_table_set(ts, "file") != 0)
+    if(pdb_write_table_set(ts, "file_test") != 0)
         fprintf(stderr, "%s\n", pdb_get_error());
 
     pdb_free_table_set(ts);

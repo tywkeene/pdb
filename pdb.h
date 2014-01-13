@@ -59,6 +59,7 @@ typedef struct table_entry_t{
 /*Table (or row in sql-speak). Holds a variable number of table entries 
  * in table_entries, a table id, a parent set id, number of tables and the timestamp*/
 typedef struct table_t{
+    char *name;
     table_entry_t **table_entries;
     unsigned int table_id;
     unsigned int parent_set_id;
@@ -69,6 +70,7 @@ typedef struct table_t{
 /*Table set (or file in sql-speak, I guess?) Holds a variable amount of tables,
  * the set id, max tables, current tables in this set and the timestamp*/
 typedef struct table_set_t{
+    char *name;
     table_t **table_set;
     unsigned int set_id;
     unsigned int max_tables;
@@ -98,8 +100,8 @@ void pdb_free_table_set(table_set_t *);
 /*Allocate new table entries, tables and table sets*/
 table_entry_t *pdb_alloc_table_entry(unsigned int, unsigned int, 
         const char *, const char *);
-table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int);
-table_set_t *pdb_alloc_table_set(unsigned int, unsigned int);
+table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int, const char *);
+table_set_t *pdb_alloc_table_set(unsigned int, unsigned int, const char *);
 
 /*Write table entry headers, table headers, file headers and table sets*/
 static int pdb_write_table_entry(FILE *, table_entry_t *);
@@ -108,8 +110,8 @@ static int pdb_write_file_header(FILE *, table_set_t *);
 int pdb_write_table_set(table_set_t *, const char *);
 
 /*Read table entries, tables and table sets*/
-table_entry_t *pdb_read_table_entry(FILE *, unsigned int, unsigned int);
-table_t *pdb_read_table_header(FILE *, unsigned int, unsigned int);
+static table_entry_t *pdb_read_table_entry(FILE *, unsigned int, unsigned int);
+static table_t *pdb_read_table_header(FILE *, unsigned int, unsigned int);
 table_set_t *pdb_read_table_set(const char *, unsigned int);
 
 #endif

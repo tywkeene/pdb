@@ -30,9 +30,11 @@ const char *pdb_get_error(void)
     const char *err_strs[] = {
         "No error", 
         "Bad version in file header",
-        "Invalid file format", 
+        "Invalid file format",
         "Input/Output error"
     };
+    if(pdb_errno > sizeof(err_strs))
+        return err_strs[0];
     return err_strs[pdb_errno];
 }
 
@@ -51,6 +53,7 @@ void pdb_free_table(table_t *t)
     for(i = 0; i < t->table_entry_count; i++)
         pdb_free_table_entry(t->table_entries[i]);
     free(t->table_entries);
+    free(t->name);
     free(t);
     return;
 }
@@ -61,6 +64,7 @@ void pdb_free_table_set(table_set_t *ts)
     for(i = 0; i < ts->max_tables; i++)
         pdb_free_table(ts->table_set[i]);
     free(ts->table_set);
+    free(ts->name);
     free(ts);
     return;
 }
@@ -68,8 +72,7 @@ void pdb_free_table_set(table_set_t *ts)
 table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id, 
         const char *name, const char *entry)
 {
-    table_entry_t *e;
-    e = malloc(sizeof(table_entry_t));
+    table_entry_t *e = malloc(sizeof(table_entry_t));
 
     e->entry_data = malloc(strlen(entry) + 1);
     strncpy(e->entry_data, entry, strlen(entry) + 1);
@@ -84,27 +87,30 @@ table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id,
     return e;
 }
 
-table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries)
+table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries, 
+        const char *name)
 {
-    table_t *t;
-    t = malloc(sizeof(table_t));
+    table_t *t = malloc(sizeof(table_t));
     t->table_entries = calloc(max_entries, sizeof(table_entry_t *));
     t->table_id = id;
     t->parent_set_id = parent_id;
     t->table_entry_count = 0;
     t->table_timestamp = time(NULL);
+    t->name = malloc(strlen(name) + 1);
+    strncpy(t->name, name, strlen(name) + 1);
     return t;
 }
 
-table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables)
+table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables, const char *name)
 {
-    table_set_t *ts;
-    ts = malloc(sizeof(table_set_t));
+    table_set_t *ts = malloc(sizeof(table_set_t));
     ts->table_set = calloc(max_tables, sizeof(table_t *));
     ts->set_id = id;
     ts->set_table_count = 0;
     ts->max_tables = max_tables;
     ts->set_timestamp = time(NULL);
+    ts->name = malloc(strlen(name) + 1);
+    strncpy(ts->name, name, strlen(name) + 1);
     return ts;
 }
 
@@ -179,7 +185,7 @@ int pdb_write_table_set(table_set_t *ts, const char *filename)
     return 0;
 }
 
-table_entry_t *pdb_read_table_entry(FILE *fd, unsigned int id, unsigned int parent_id)
+static table_entry_t *pdb_read_table_entry(FILE *fd, unsigned int id, unsigned int parent_id)
 {
     struct table_entry_header_t header;
     table_entry_t *e = malloc(sizeof(table_entry_t));
@@ -197,7 +203,7 @@ table_entry_t *pdb_read_table_entry(FILE *fd, unsigned int id, unsigned int pare
     return e;
 }
 
-table_t *pdb_read_table_header(FILE *fd, unsigned int table_id, unsigned int parent_id)
+static table_t *pdb_read_table_header(FILE *fd, unsigned int table_id, unsigned int parent_id)
 {
     table_t *t = malloc(sizeof(table_t));
     unsigned int cur_entry;
