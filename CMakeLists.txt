@@ -8,8 +8,11 @@ add_library(pdb SHARED pdb.c)
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)
 set(VERSION_RELEASE 0)
-set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE}) 
-set_target_properties(pdb PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR}) 
+set(VERSION_STRING ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_RELEASE})
+set_target_properties(pdb PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSION_MAJOR})
+
+add_executable(file_io_test file_io_test.c)
+target_link_libraries(file_io_test pdb)
 
 
 include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)

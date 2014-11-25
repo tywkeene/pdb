@@ -28,7 +28,7 @@ int pdb_get_version_release(void)
 const char *pdb_get_error(void)
 {
     const char *err_strs[] = {
-        "No error", 
+        "No error",
         "Bad version in file header",
         "Invalid file format",
         "Input/Output error"
@@ -69,7 +69,7 @@ void pdb_free_table_set(table_set_t *ts)
     return;
 }
 
-table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id, 
+table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id,
         const char *name, const char *entry)
 {
     table_entry_t *e = malloc(sizeof(table_entry_t));
@@ -87,7 +87,7 @@ table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id,
     return e;
 }
 
-table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries, 
+table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries,
         const char *name)
 {
     table_t *t = malloc(sizeof(table_t));
@@ -116,8 +116,8 @@ table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables, const
 
 static int pdb_write_table_entry(FILE *fd, table_entry_t *e)
 {
-    struct table_entry_header_t header = {.name_len = strlen(e->entry_name), 
-    .data_len = strlen(e->entry_data), .timestamp = e->entry_timestamp};
+    struct table_entry_header_t header = {.name_len = strlen(e->entry_name),
+        .data_len = strlen(e->entry_data), .timestamp = e->entry_timestamp};
 
     if(fwrite(&header, PDB_ENTRY_HEADER_LEN, 1, fd) != 1){
         pdb_errno = ERROR_IO;
@@ -131,7 +131,7 @@ static int pdb_write_table_entry(FILE *fd, table_entry_t *e)
 
 static int pdb_write_table_header(FILE *fd, table_t *t)
 {
-    struct table_header_t header = {.entries = t->table_entry_count, 
+    struct table_header_t header = {.entries = t->table_entry_count,
         .timestamp = t->table_timestamp};
     if(fwrite(&header, PDB_TABLE_HEADER_LEN, 1, fd) != 1){
         pdb_errno = ERROR_IO;
@@ -145,7 +145,7 @@ static int pdb_write_file_header(FILE *fd, table_set_t *ts)
 {
     struct file_header_t header = {
         .pdb_version_major = PDB_VERSION_MAJOR,
-        .tables = ts->set_table_count, 
+        .tables = ts->set_table_count,
         .timestamp = ts->set_timestamp};
     if(fwrite(&header, PDB_FILE_HEADER_LEN, 1, fd) != 1){
         pdb_errno = ERROR_IO;
@@ -250,4 +250,14 @@ table_set_t *pdb_read_table_set(const char *filename, unsigned int id)
         ts->table_set[cur_table] = pdb_read_table_header(fd, cur_table, ts->set_id);
     fclose(fd);
     return ts;
+}
+
+void pdb_add_table_entry(table_t *t, table_entry_t *e)
+{
+    t->table_entries[t->table_entry_count++] = e;
+}
+
+void pdb_add_table(table_set_t *ts, table_t *t)
+{
+    ts->table_set[ts->set_table_count++] = t;
 }

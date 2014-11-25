@@ -6,13 +6,13 @@
 #define PDB_VERSION_MAJOR 1
 #define PDB_VERSION_MINOR 0
 #define PDB_VERSION_RELEASE 0
-#define PDB_VERSION_STRING "libpdb (Version 1.0.0)"
+#define PDB_VERSION_STRING "libpdb (Version 2.0.0)"
 
 #define PDB_FILE_HEADER_LEN (sizeof(struct file_header_t))
 #define PDB_TABLE_HEADER_LEN (sizeof(struct table_header_t))
 #define PDB_ENTRY_HEADER_LEN (sizeof(struct table_entry_header_t))
 
-/*Error maigc numbers, used in pdb_get_error() to get a descriptive string
+/*Error magic numbers, used in pdb_get_error() to get a descriptive string
  * of the most recent error*/
 #define ERROR_BAD_VERSION 1
 #define ERROR_INVALID_FILE 2
@@ -20,10 +20,10 @@
 
 /*Global variables of various uses*/
 
-/*Holds the error number of the most recent error (defined above*/
+/*Holds the error number of the most recent error (defined above)*/
 int pdb_errno;
 
-/*File header - Holds length of table entry 
+/*File header - Holds length of table entry
  * name/data and the timestamp of the entry*/
 typedef struct table_entry_header_t{
     unsigned int name_len;
@@ -31,14 +31,14 @@ typedef struct table_entry_header_t{
     time_t timestamp;
 }__attribute__((packed)) table_entry_header_t;
 
-/*File header - Holds the count of entries 
+/*File header - Holds the count of entries
  * in the table and the timstamp for that table*/
 typedef struct table_header_t{
     unsigned int entries;
     time_t timestamp;
 }__attribute__((packed)) table_header_t;
 
-/*File header - Holds the PDB version of the file, 
+/*File header - Holds the PDB version of the file,
  * number of tables and timestamp of the set*/
 typedef struct file_header_t{
     int pdb_version_major;
@@ -46,7 +46,7 @@ typedef struct file_header_t{
     time_t timestamp;
 }__attribute__((packed)) file_header_t;
 
-/*Table entry (or 'collumn' in sql-speak). Holds the actual 
+/*Table entry (or 'collumn' in sql-speak). Holds the actual
  * data name/data, an id, the id of the parent table and the entry timestamp*/
 typedef struct table_entry_t{
     char *entry_data;
@@ -56,7 +56,7 @@ typedef struct table_entry_t{
     time_t entry_timestamp;
 }table_entry_t;
 
-/*Table (or row in sql-speak). Holds a variable number of table entries 
+/*Table (or row in sql-speak). Holds a variable number of table entries
  * in table_entries, a table id, a parent set id, number of tables and the timestamp*/
 typedef struct table_t{
     char *name;
@@ -98,7 +98,7 @@ void pdb_free_table(table_t *);
 void pdb_free_table_set(table_set_t *);
 
 /*Allocate new table entries, tables and table sets*/
-table_entry_t *pdb_alloc_table_entry(unsigned int, unsigned int, 
+table_entry_t *pdb_alloc_table_entry(unsigned int, unsigned int,
         const char *, const char *);
 table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int, const char *);
 table_set_t *pdb_alloc_table_set(unsigned int, unsigned int, const char *);
@@ -113,5 +113,9 @@ int pdb_write_table_set(table_set_t *, const char *);
 static table_entry_t *pdb_read_table_entry(FILE *, unsigned int, unsigned int);
 static table_t *pdb_read_table_header(FILE *, unsigned int, unsigned int);
 table_set_t *pdb_read_table_set(const char *, unsigned int);
+
+/*Helper functions to add tables/entries to table sets/tables, respectively*/
+void pdb_add_table_entry(table_t *, table_entry_t *);
+void pdb_add_table(table_set_t *, table_t *);
 
 #endif
