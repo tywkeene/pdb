@@ -3,7 +3,7 @@ project(libpdb)
 
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_C_FLAGS "-fPIC -g -Wall -std=c11")
-add_library(pdb SHARED pdb.c)
+add_library(pdb SHARED pdb.c io.c util.c)
 
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 0)

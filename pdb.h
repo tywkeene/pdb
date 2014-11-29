@@ -78,9 +78,9 @@ typedef struct table_set_t{
 
 /*
 All functions are in order of appearance in their respective files
-These functions are in pdb.c
 */
 
+/*util.c*/
 /*Get version string, major version, minor version and release version*/
 char *pdb_get_version_string(void);
 int pdb_get_version_major(void);
@@ -90,6 +90,15 @@ int pdb_get_version_release(void);
 /*Get error string*/
 const char *pdb_get_error(void);
 
+/*Helper functions to add tables/entries to table sets/tables, respectively*/
+void pdb_add_table_entry(table_t *, table_entry_t *);
+void pdb_add_table(table_set_t *, table_t *);
+
+/*Helper functions to get table count in a set and entry count in a table*/
+unsigned int pdb_get_table_count(table_set_t *);
+unsigned int pdb_get_entry_count(table_t *t);
+
+/*pdb.c*/
 /*Free table entries, tables and table sets*/
 void pdb_free_table_entry(table_entry_t *);
 void pdb_free_table(table_t *);
@@ -101,23 +110,16 @@ table_entry_t *pdb_alloc_table_entry(unsigned int, unsigned int,
 table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int);
 table_set_t *pdb_alloc_table_set(unsigned int, unsigned int);
 
+/*io.c*/
 /*Write table entry headers, table headers, file headers and table sets*/
-static int pdb_write_table_entry(FILE *, table_entry_t *);
-static int pdb_write_table_header(FILE *, table_t *);
-static int pdb_write_file_header(FILE *, table_set_t *);
-int pdb_write_table_set(table_set_t *, const char *);
+__attribute__((unused)) static int pdb_write_table_entry(FILE *, table_entry_t *);
+__attribute__((unused)) static int pdb_write_table_header(FILE *, table_t *);
+__attribute__((unused)) static int pdb_write_file_header(FILE *, table_set_t *);
+__attribute__((unused)) int pdb_write_table_set(table_set_t *, const char *);
 
 /*Read table entries, tables and table sets*/
-static table_entry_t *pdb_read_table_entry(FILE *, unsigned int, unsigned int);
-static table_t *pdb_read_table_header(FILE *, unsigned int, unsigned int);
+__attribute__((unused)) static table_entry_t *pdb_read_table_entry(FILE *, unsigned int, unsigned int);
+__attribute__((unused)) static table_t *pdb_read_table_header(FILE *, unsigned int, unsigned int);
 table_set_t *pdb_read_table_set(const char *, unsigned int);
-
-/*Helper functions to add tables/entries to table sets/tables, respectively*/
-void pdb_add_table_entry(table_t *, table_entry_t *);
-void pdb_add_table(table_set_t *, table_t *);
-
-/*Helper functions to get table count in a set and entry count in a table*/
-unsigned int pdb_get_table_count(table_set_t *);
-unsigned int pdb_get_entry_count(table_t *t);
 
 #endif
