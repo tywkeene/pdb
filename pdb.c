@@ -42,6 +42,7 @@ void pdb_free_table_entry(table_entry_t *e)
 {
     if(e == NULL)
         return;
+    free(e->entry_name);
     free(e->entry_data);
     free(e);
     return;
@@ -53,7 +54,6 @@ void pdb_free_table(table_t *t)
     for(i = 0; i < t->table_entry_count; i++)
         pdb_free_table_entry(t->table_entries[i]);
     free(t->table_entries);
-    free(t->name);
     free(t);
     return;
 }
@@ -64,7 +64,6 @@ void pdb_free_table_set(table_set_t *ts)
     for(i = 0; i < ts->max_tables; i++)
         pdb_free_table(ts->table_set[i]);
     free(ts->table_set);
-    free(ts->name);
     free(ts);
     return;
 }
@@ -87,8 +86,7 @@ table_entry_t *pdb_alloc_table_entry(unsigned int id, unsigned int parent_id,
     return e;
 }
 
-table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries,
-        const char *name)
+table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int max_entries)
 {
     table_t *t = malloc(sizeof(table_t));
     t->table_entries = calloc(max_entries, sizeof(table_entry_t *));
@@ -96,12 +94,10 @@ table_t *pdb_alloc_table(unsigned int id, unsigned int parent_id, unsigned int m
     t->parent_set_id = parent_id;
     t->table_entry_count = 0;
     t->table_timestamp = time(NULL);
-    t->name = malloc(strlen(name) + 1);
-    strncpy(t->name, name, strlen(name) + 1);
     return t;
 }
 
-table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables, const char *name)
+table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables)
 {
     table_set_t *ts = malloc(sizeof(table_set_t));
     ts->table_set = calloc(max_tables, sizeof(table_t *));
@@ -109,8 +105,6 @@ table_set_t *pdb_alloc_table_set(unsigned int id, unsigned int max_tables, const
     ts->set_table_count = 0;
     ts->max_tables = max_tables;
     ts->set_timestamp = time(NULL);
-    ts->name = malloc(strlen(name) + 1);
-    strncpy(ts->name, name, strlen(name) + 1);
     return ts;
 }
 
@@ -210,6 +204,10 @@ static table_t *pdb_read_table_header(FILE *fd, unsigned int table_id, unsigned 
     struct table_header_t header;
 
     fread(&header, PDB_TABLE_HEADER_LEN, 1, fd);
+
+    fprintf(stdout, "<table header> ID: %u\tParent: %u\tTimestamp: %ld\tEntries: %u\n",
+            table_id, parent_id, header.timestamp, header.entries);
+
     t->table_id = table_id;
     t->parent_set_id = parent_id;
     t->table_timestamp = header.timestamp;
@@ -234,6 +232,9 @@ table_set_t *pdb_read_table_set(const char *filename, unsigned int id)
     }
 
     fread(&file_header, PDB_FILE_HEADER_LEN, 1, fd);
+
+    fprintf(stdout, "<file header> File: %s\t ID: %u\tFile version major: %d\tTimestamp: %ld\tTables: %u\n",
+            filename, id, file_header.pdb_version_major,file_header.timestamp, file_header.tables);
 
     if(file_header.pdb_version_major != PDB_VERSION_MAJOR){
         pdb_errno = ERROR_BAD_VERSION;
@@ -260,4 +261,14 @@ void pdb_add_table_entry(table_t *t, table_entry_t *e)
 void pdb_add_table(table_set_t *ts, table_t *t)
 {
     ts->table_set[ts->set_table_count++] = t;
+}
+
+unsigned int pdb_get_table_count(table_set_t *ts)
+{
+    return ts->set_table_count;
+}
+
+unsigned int pdb_get_entry_count(table_t *t)
+{
+    return t->table_entry_count;
 }

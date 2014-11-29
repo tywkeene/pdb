@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(libpdb)
 
 set(CMAKE_C_COMPILER clang)
-set(CMAKE_C_FLAGS "-g -Wall -std=c11")
+set(CMAKE_C_FLAGS "-fPIC -g -Wall -std=c11")
 add_library(pdb SHARED pdb.c)
 
 set(VERSION_MAJOR 1)
@@ -13,7 +13,6 @@ set_target_properties(pdb PROPERTIES VERSION ${VERSION_STRING} SOVERSION ${VERSI
 
 add_executable(file_io_test file_io_test.c)
 target_link_libraries(file_io_test pdb)
-
 
 include (${CMAKE_ROOT}/Modules/CheckFunctionExists.cmake)
 check_function_exists(fread HAVE_FREAD)

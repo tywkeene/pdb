@@ -6,7 +6,7 @@
 #define PDB_VERSION_MAJOR 1
 #define PDB_VERSION_MINOR 0
 #define PDB_VERSION_RELEASE 0
-#define PDB_VERSION_STRING "libpdb (Version 2.0.0)"
+#define PDB_VERSION_STRING "libpdb (Version 1.0.0)"
 
 #define PDB_FILE_HEADER_LEN (sizeof(struct file_header_t))
 #define PDB_TABLE_HEADER_LEN (sizeof(struct table_header_t))
@@ -59,7 +59,6 @@ typedef struct table_entry_t{
 /*Table (or row in sql-speak). Holds a variable number of table entries
  * in table_entries, a table id, a parent set id, number of tables and the timestamp*/
 typedef struct table_t{
-    char *name;
     table_entry_t **table_entries;
     unsigned int table_id;
     unsigned int parent_set_id;
@@ -70,7 +69,6 @@ typedef struct table_t{
 /*Table set (or file in sql-speak, I guess?) Holds a variable amount of tables,
  * the set id, max tables, current tables in this set and the timestamp*/
 typedef struct table_set_t{
-    char *name;
     table_t **table_set;
     unsigned int set_id;
     unsigned int max_tables;
@@ -100,8 +98,8 @@ void pdb_free_table_set(table_set_t *);
 /*Allocate new table entries, tables and table sets*/
 table_entry_t *pdb_alloc_table_entry(unsigned int, unsigned int,
         const char *, const char *);
-table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int, const char *);
-table_set_t *pdb_alloc_table_set(unsigned int, unsigned int, const char *);
+table_t *pdb_alloc_table(unsigned int, unsigned int, unsigned int);
+table_set_t *pdb_alloc_table_set(unsigned int, unsigned int);
 
 /*Write table entry headers, table headers, file headers and table sets*/
 static int pdb_write_table_entry(FILE *, table_entry_t *);
@@ -117,5 +115,9 @@ table_set_t *pdb_read_table_set(const char *, unsigned int);
 /*Helper functions to add tables/entries to table sets/tables, respectively*/
 void pdb_add_table_entry(table_t *, table_entry_t *);
 void pdb_add_table(table_set_t *, table_t *);
+
+/*Helper functions to get table count in a set and entry count in a table*/
+unsigned int pdb_get_table_count(table_set_t *);
+unsigned int pdb_get_entry_count(table_t *t);
 
 #endif
