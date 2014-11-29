@@ -5,3 +5,7 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 file_test
+file_io_test
+libpdb.so
+libpdb.so.1
+libpdb.so.1.0.0
