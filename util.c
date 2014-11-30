@@ -48,6 +48,20 @@ void pdb_add_table(table_set_t *ts, table_t *t)
     ts->table_set[ts->set_table_count++] = t;
 }
 
+table_t *pdb_get_table(table_set_t *ts, unsigned int table)
+{
+    if(table > ts->set_table_count)
+        return NULL;
+    return ts->table_set[table];
+}
+
+table_entry_t *pdb_get_entry(table_t *t, unsigned int entry)
+{
+    if(entry > t->table_entry_count)
+        return NULL;
+    return t->table_entries[entry];
+}
+
 unsigned int pdb_get_table_count(table_set_t *ts)
 {
     return ts->set_table_count;

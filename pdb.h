@@ -94,6 +94,10 @@ const char *pdb_get_error(void);
 void pdb_add_table_entry(table_t *, table_entry_t *);
 void pdb_add_table(table_set_t *, table_t *);
 
+/*Helper functions to get table/entry pointers*/
+table_t *pdb_get_table(table_set_t *, unsigned int);
+table_entry_t *pdb_get_entry(table_t *, unsigned int);
+
 /*Helper functions to get table count in a set and entry count in a table*/
 unsigned int pdb_get_table_count(table_set_t *);
 unsigned int pdb_get_entry_count(table_t *t);
