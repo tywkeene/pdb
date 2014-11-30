@@ -45,6 +45,10 @@ void pdb_add_table_entry(table_t *t, table_entry_t *e)
 
 void pdb_add_table(table_set_t *ts, table_t *t)
 {
+    if((ts->set_table_count + 1) > ts->max_tables){
+        pdb_errno = ERROR_TS_OUT_OF_RANGE;
+        return;
+    }
     ts->table_set[ts->set_table_count++] = t;
 }
 

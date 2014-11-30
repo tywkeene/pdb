@@ -17,6 +17,7 @@
 #define ERROR_BAD_VERSION 1
 #define ERROR_INVALID_FILE 2
 #define ERROR_IO 3
+#define ERROR_TS_OUT_OF_RANGE 4
 
 #define sizeof_array(x) (sizeof(x) / sizeof(x[0]))
 
