@@ -18,6 +18,8 @@
 #define ERROR_INVALID_FILE 2
 #define ERROR_IO 3
 
+#define sizeof_array(x) (sizeof(x) / sizeof(x[0]))
+
 /*Global variables of various uses*/
 
 /*Holds the error number of the most recent error (defined above)*/

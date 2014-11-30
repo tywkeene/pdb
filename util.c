@@ -33,7 +33,7 @@ const char *pdb_get_error(void)
         "Invalid file format",
         "Input/Output error"
     };
-    if(pdb_errno > sizeof(err_strs))
+    if(pdb_errno > sizeof_array(err_strs) || pdb_errno < 1)
         return err_strs[0];
     return err_strs[pdb_errno];
 }
